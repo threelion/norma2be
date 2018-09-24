@@ -1,0 +1,18 @@
+mongoexport --db jwtauth --collection consumers --out data/consumers.json
+mongoexport --db jwtauth --collection countries --out data/countries.json
+mongoexport --db jwtauth --collection files --out data/files.json
+mongoexport --db jwtauth --collection groups --out data/groups.json
+mongoexport --db jwtauth --collection producers --out data/producers.json
+mongoexport --db jwtauth --collection productgroups --out data/productgroups.json
+mongoexport --db jwtauth --collection products --out data/products.json
+mongoexport --db jwtauth --collection tasks --out data/tasks.json
+mongoexport --db jwtauth --collection taskstatuses --out data/taskstatuses.json
+mongoexport --db jwtauth --collection tasktypes --out data/tasktypes.json
+mongoexport --db jwtauth --collection units --out data/units.json
+mongoexport --db jwtauth --collection users --out data/users.json
+
+mongoexport --db jwtauth --collection potentialpositions --out data/potentialpositions.json
+mongoexport --db jwtauth --collection potentialdeals --out data/potentialdeals.json
+mongoexport --db jwtauth --collection proposals --out data/proposals.json
+mongoexport --db jwtauth --collection suppliers --out data/suppliers.json
+

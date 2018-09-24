@@ -1,0 +1,12 @@
+mongoimport --db jwtauth --collection consumers --drop --file data/consumers.json
+mongoimport --db jwtauth --collection countries --drop --file data/countries.json
+mongoimport --db jwtauth --collection files --drop --file data/files.json
+mongoimport --db jwtauth --collection groups --drop --file data/groups.json
+mongoimport --db jwtauth --collection producers --drop --file data/producers.json
+mongoimport --db jwtauth --collection productgroups --drop --file data/productgroups.json
+mongoimport --db jwtauth --collection products --drop --file data/products.json
+mongoimport --db jwtauth --collection tasks --drop --file data/tasks.json
+mongoimport --db jwtauth --collection taskstatuses --drop --file data/taskstatuses.json
+mongoimport --db jwtauth --collection tasktypes --drop --file data/tasktypes.json
+mongoimport --db jwtauth --collection units --drop --file data/units.json
+mongoimport --db jwtauth --collection users --drop --file data/users.json

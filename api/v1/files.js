@@ -30,7 +30,7 @@ router.get('/:id/download', function(req, res) {
 	}) 
 });
 
-router.post('/', function(req, res) {
+router.post('/upload', function(req, res) {
 	console.log('request for upload file');
 
   var form = new multiparty.Form();
@@ -70,6 +70,18 @@ router.post('/', function(req, res) {
 
 router.delete('/:id', function(req, res) {
 	console.log('request for deleting file');
+
+	return File.findOne({_id: req.params.id}, function(err, fileFound){
+		if (err) return res.status(500).send({error: 'Error during fining file for delete'})
+
+		if (! fileFound) return res.status(404).send({error: 'File cant be deleted. Not exists'})
+
+		return File.remove({_id: req.params.id}, function(err, removedFile){
+			if (err) return res.status(500).send({error: 'Error removing file'})
+
+			res.send(fileFound);
+		})
+	})
 });
 
 module.exports = router;

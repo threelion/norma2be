@@ -1,8 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
+var _ = require('lodash');
+
 var Task = require('../../models/task');
 var File = require('../../models/file');
+var PotentialDeal = require('../../models/potentialDeal');
 
 var fs = require('fs');
 
@@ -56,11 +59,13 @@ router.get('/byexecutor/:executorId', function(req, res) {
 });
 
 router.get('/byceo/:ceoId', function(req, res) {
-	console.log('request for tasks list for executor');
+	console.log('request for tasks list for ceo');
 
 	return Task.find({$or:[{executor: req.params.ceoId}, {controller: req.params.ceoId}]}, function(err, tasks) {
-		if (err) 
+		if (err) {
+			console.log(err);
 			return res.status(500).send({ error: 'Error during request'});
+		}
 
 		res.send(tasks);
 	}) 
@@ -91,146 +96,28 @@ router.get('/:id', function(req, res) {
 	}) 
 });
 
-router.post('/', function(req, res) {
-	console.log('request for new task');
-
-  var form = new multiparty.Form();
-
-  form.parse(req, function(err, fields, files) {
-    if (err) {
-      res.writeHead(400, {'content-type': 'text/plain'});
-      res.end("invalid request: " + err.message);
-      return;
-    }
-
-    var postedFields = fields;
-
-    if (files.file){
-
-    	var file = files.file[0];
-
-
-			var newFile = new File({
-				initialFilename: file.originalFilename,
-				size: file.size,
-				content: file.headers['content-type'],
-				uploadedAt: new Date()
-			})
-
-			return newFile.save( function(err, savedFile){
-				if (err) return res.status(500).send({ error: 'Error during request file saving'});
-
-		    fs.createReadStream(file.path).pipe(fs.createWriteStream(docsFolder + savedFile._id + path.extname(file.originalFilename)));
-		    fs.unlinkSync(file.path);
-
-				var newTask = new Task({
-					name: postedFields.name[0],
-					issuer: postedFields.issuer[0],
-					executor: postedFields.executor[0],
-					controller: postedFields.controller[0],
-					description: postedFields.description[0],
-					deadline: postedFields.deadline[0],
-					status: postedFields.status[0],
-					isInitialTask: postedFields.isInitialTask[0],
-					taskType: postedFields.taskType[0],
-					issuedAt: new Date(),
-					attachments: [savedFile._id],
-				});
-
-				return newTask.save( function(err, savedTask) {
-					if (err) 
-						return res.status(500).send({ error: 'Error during request'});
-
-					return Task.findById( savedTask._id, function(err, populatedTask){
-						if (err)
-							return res.status(500).send({ error: 'Error during request'});
-						
-						return res.send(populatedTask);
-					})
-				})		    
-
-			})
-
-    } else {
-				var newTask = new Task({
-					name: postedFields.name[0],
-					issuer: postedFields.issuer[0],
-					executor: postedFields.executor[0],
-					controller: postedFields.controller[0],
-					description: postedFields.description[0],
-					deadline: postedFields.deadline[0],
-					status: postedFields.status[0],
-					isInitialTask: postedFields.isInitialTask[0],
-					taskType: postedFields.taskType[0],
-					issuedAt: new Date(),
-				});
-
-				return newTask.save( function(err, savedTask) {
-					if (err) 
-						return res.status(500).send({ error: 'Error during request'});
-
-					return Task.findById( savedTask._id, function(err, populatedTask){
-						if (err)
-							return res.status(500).send({ error: 'Error during request'});
-						
-						return res.send(populatedTask);
-					})
-				})
-    }
-  });	
-
-});
-
 router.put('/:id', function(req, res) {
 	console.log('request for modifying task info');
 
-  var form = new multiparty.Form();
+	return changeRecord(Task, req.params.id, req.body)
+		.then( function(data){
 
-  form.parse(req, function(err, fields, files) {
-    if (err) {
-      res.writeHead(400, {'content-type': 'text/plain'});
-      res.end("invalid request: " + err.message);
-      return;
-    }
+			if (! data) {
+				return res.status(404).send({ error: 'There are no such a task'});
+			}
 
-    var postedFields = fields;
-
-		var newTask = {
-			//issuedAt: new Date(),
-		};
-		if (postedFields.name) newTask.name = postedFields.name[0];
-		if (postedFields.issuer)  newTask.issuer = postedFields.issuer[0];
-		if (postedFields.executor) newTask.executor = postedFields.executor[0];
-		if (postedFields.controller)  newTask.controller = postedFields.controller[0];
-		if (postedFields.description)  newTask.description = postedFields.description[0];
-		if (postedFields.deadline)  newTask.deadline = postedFields.deadline[0];
-		if (postedFields.status)  newTask.status = postedFields.status[0];
-		if (postedFields.taskType)  newTask.taskType = postedFields.taskType[0];
-		if (postedFields.executedAt)  newTask.executedAt = postedFields.executedAt[0];
-		if (postedFields.nextTask)  newTask.nextTask = postedFields.nextTask[0];
-		if (postedFields.cancelationReason)  newTask.cancelationReason = postedFields.cancelationReason[0];
-		if (postedFields.attachments)  newTask.attachments = postedFields.attachments[0];
-
-		changeRecord(Task, req.params.id, newTask)
-			.then( function(data){
-
-				if (! data) {
-					return res.status(404).send({ error: 'There are no such a task'});
-				}
-
-				return Task.findById( req.params.id, function(err, populatedTask){
-					if (err)
-						return res.status(500).send({ error: 'Error during request'});
-					
-					return res.send(populatedTask);
-				})
-
-				//res.send(data);
+			return Task.findById( req.params.id, function(err, populatedTask){
+				if (err)
+					return res.status(500).send({ error: 'Error during request'});
+				
+				return res.send(populatedTask);
 			})
-			.catch( function(err){
-				res.status(500).send({error: "Server Error"});
-			})
-  })
+
+			//res.send(data);
+		})
+		.catch( function(err){
+			res.status(500).send({error: "Server Error"});
+		})
 });
 
 router.post('/:taskid/addfile/:fileid', function(req,res){
@@ -278,8 +165,6 @@ router.post('/:taskid/deletefile/:fileid', function(req,res){
 			return res.status(400).send({ error: 'Task not exists'})
 		}
 
-		console.log(task.attachments);
-
 		var newAttachments = [];
 
 		if (task.attachments){
@@ -304,5 +189,98 @@ router.delete('/:id', function(req, res) {
 	console.log('request for deleting task');
 
 });
+
+router.post('/', function(req, res) {
+	console.log('request for new task');
+
+	// var newTask = new Task({
+	// 	name: req.body.name,
+	// 	issuer: req.body.issuer,
+	// 	//executors: req.body.executors,
+	// 	controller: req.body.controller,
+	// 	description: req.body.description,
+	// 	deadline: req.body.deadline,
+	// 	status: "c8ebbe80-b279-11e8-9dbd-f7e01824872b", // Status "Current"
+	// 	isInitialTask: true,
+	// 	taskType: req.body.taskType,
+	// 	issuedAt: new Date(),
+	// 	attachments: req.body.attachments,
+	// });
+
+	var newTask = {
+		name: req.body.name,
+		issuer: req.body.issuer,
+		//executors: req.body.executors,
+		controller: req.body.controller,
+		description: req.body.description,
+		deadline: req.body.deadline,
+		status: "c8ebbe80-b279-11e8-9dbd-f7e01824872b", // Status "Current"
+		isInitialTask: true,
+		taskType: req.body.taskType,
+		issuedAt: new Date(),
+		attachments: req.body.attachments,
+	};
+
+	return makeExtraFieldsToTask(req.body)
+		.then( function(extraFields){
+
+			newTask = _.assign({}, newTask, extraFields);
+
+			var newTasks = [];
+
+			req.body.executor.forEach( function(o){
+				newTasks.push(_.assign({}, newTask, {executor: o}))
+			})
+
+			return Task.insertMany(newTasks, function(err, savedTasks) {
+				if (err) {
+					console.log(err);
+					return res.status(500).send({ error: 'Error during request'});
+				}
+
+					return res.send(savedTasks);
+				})
+			})
+});
+
+function makeExtraFieldsToTask(task){
+	console.log(task.taskType);
+
+	switch (task.taskType) {
+		case "5a5ef580-b284-11e8-8c8d-4f0ec6e9498f": // Find proposals
+			var deal = new PotentialDeal({
+				name: task.name,
+				issuedAt: new Date(),
+				issuer: task.issuer._id,
+			})
+
+			return new Promise( function(resolve, reject){
+				return deal.save( function(err, newDeal){
+					if (err) {
+						console.err('Error during saving new potential deal with new task');
+						reject(err);
+					}
+
+					return resolve({potentialDeal: newDeal._id});
+				})
+			}) 
+
+			break;
+		// case "5a5ef580-b284-11e8-8c8d-4f0ec6e9498f": // Find proposals
+
+		// 	break;
+		// case "5a5ef580-b284-11e8-8c8d-4f0ec6e9498f": // Find proposals
+
+		// 	break;
+		// case "5a5ef580-b284-11e8-8c8d-4f0ec6e9498f": // Find proposals
+
+			// break;
+		default: 
+			return new Promise( function(resolve, reject){
+				return  resolve({});
+				})
+	}
+}
+
 
 module.exports = router;
