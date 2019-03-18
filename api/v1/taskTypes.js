@@ -36,6 +36,7 @@ router.post('/', function(req, res) {
 
 	var newTaskType = new TaskType({
 		name: req.body.name,
+		taskGroup: req.body.taskGroup,
 		// signed_at: req.body.signed_at,
 		// number: req.body.number
 	});

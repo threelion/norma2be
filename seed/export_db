@@ -16,3 +16,7 @@ mongoexport --db jwtauth --collection potentialdeals --out data/potentialdeals.j
 mongoexport --db jwtauth --collection proposals --out data/proposals.json
 mongoexport --db jwtauth --collection suppliers --out data/suppliers.json
 
+mongoexport --db jwtauth --collection currencies --out data/currencies.json
+mongoexport --db jwtauth --collection currencyrates --out data/currencyrates.json
+mongoexport --db jwtauth --collection paymenttypes --out data/paymenttypes.json
+mongoexport --db jwtauth --collection taskgroups --out data/taskgroups.json

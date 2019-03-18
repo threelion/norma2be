@@ -6,6 +6,8 @@ var Product = require('./product');
 var Supplier = require('./supplier');
 var PotentialPosition = require('./potentialPosition');
 
+var CurrencyRate = require('./currencyRate');
+
 var autopopulate = require('mongoose-autopopulate');
 // Schemas
 
@@ -36,6 +38,13 @@ var Proposal = new Schema({
 		type: Number,
 		required: true
 	},
+	currencyRate: {
+		type: String,
+		ref: 'CurrencyRate',
+		autopopulate: {
+			select: '_id rateDate rate currency'
+		}
+	},
 	deliveryDays: {
 		type: Number,
 		required: true
@@ -47,7 +56,19 @@ var Proposal = new Schema({
 			select: '_id name contacts country'
 		},
 		required: true
-	}
+	},
+	createdAt: Date,
+	payOrder: {
+		type: Number,
+		required: true,
+	},
+	payMethod: {
+		type: Number,
+		required: true,
+	},
+	payMethod: {
+		type: Number,
+	},
 });
 
 // Product.path('name').validate( function (value) {

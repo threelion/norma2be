@@ -10,3 +10,12 @@ mongoimport --db jwtauth --collection taskstatuses --drop --file data/taskstatus
 mongoimport --db jwtauth --collection tasktypes --drop --file data/tasktypes.json
 mongoimport --db jwtauth --collection units --drop --file data/units.json
 mongoimport --db jwtauth --collection users --drop --file data/users.json
+
+mongoimport --db jwtauth --collection potentialpositions --drop --file data/potentialpositions.json
+mongoimport --db jwtauth --collection potentialdeals --drop --file data/potentialdeals.json
+mongoimport --db jwtauth --collection proposals --drop --file data/proposals.json
+mongoimport --db jwtauth --collection suppliers --drop --file data/suppliers.json
+mongoimport --db jwtauth --collection currencies --drop --file data/currencies.json
+mongoimport --db jwtauth --collection currencyrates --drop --file data/currencyrates.json
+mongoimport --db jwtauth --collection paymenttypes --drop --file data/paymenttypes.json
+mongoimport --db jwtauth --collection taskgroups --drop --file data/taskgroups.json

@@ -25,6 +25,11 @@ router.post('/', function(req, res) {
 		price: req.body.price,
 		deliveryDays: req.body.deliveryDays,
 		supplier: req.body.supplier,
+		currencyRate: req.body.currencyRate,
+		payOrder: req.body.payOrder,
+		payMethod: req.body.payMethod,
+		createdAt: req.body.createdAt,
+		prepayPercent: req.body.prepayPercent,
 	});
 
 	return newProposal.save( function(err, savedProposal) {
